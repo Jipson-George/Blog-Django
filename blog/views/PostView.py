@@ -1,7 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.shortcuts import get_object_or_404
 from blog.models import Post, Comment
 from blog.serializers import PostSerializer, PostDetailSerializer, CommentSerializer
@@ -47,7 +46,7 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostDetailSerializer(post)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=["delete"], url_path="delete")
+    @action(detail=True, methods=["delete"], url_path="delete-posts")
     def delete_post(self, request, pk=None):
         """Allow only the author to delete their post"""
         post = get_object_or_404(Post, pk=pk)
