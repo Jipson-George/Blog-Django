@@ -49,10 +49,20 @@ class PostViewSet(viewsets.ViewSet):
     
     @action(detail=True, methods=["post"], url_path="comment")
     def add_comment(self, request, pk=None):
-        """Add a comment to a specific post"""
+        """Add a comment to a specific post, only if the post doesn't belong to the user"""
         post = get_object_or_404(Post, pk=pk)
+
+        # ✅ Prevent self-commenting
+        if post.author == request.user:
+            return Response(
+                {"message": "You cannot comment on your own post."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(post=post, author=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
