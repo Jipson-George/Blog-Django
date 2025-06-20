@@ -47,6 +47,20 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostDetailSerializer(post)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    @action(detail=True, methods=["delete"], url_path="delete")
+    def delete_post(self, request, pk=None):
+        """Allow only the author to delete their post"""
+        post = get_object_or_404(Post, pk=pk)
+
+        if post.author != request.user:
+            return Response(
+                {"message": "You are not authorized to delete this post."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        post.delete()
+        return Response({"message": "Post deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+    
     @action(detail=True, methods=["post"], url_path="comment")
     def add_comment(self, request, pk=None):
         """Add a comment to a specific post, only if the post doesn't belong to the user"""
